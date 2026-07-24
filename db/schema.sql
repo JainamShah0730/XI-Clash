@@ -82,12 +82,3 @@ CREATE INDEX IF NOT EXISTS idx_players_position ON players(position_primary);
 CREATE INDEX IF NOT EXISTS idx_players_club ON players(real_club);
 CREATE INDEX IF NOT EXISTS idx_match_events_match ON match_events(match_id);
 
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'tactics_name_unique') THEN
-    ALTER TABLE tactics ADD CONSTRAINT tactics_name_unique UNIQUE (name);
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'coaches_name_unique') THEN
-    ALTER TABLE coaches ADD CONSTRAINT coaches_name_unique UNIQUE (name);
-  END IF;
-END $$;

@@ -39,7 +39,12 @@ export default function AuthPanel({ onAuthenticated }) {
                     onChange={(e) => setPassword(e.target.value)}
                     style={{ width: "100%", padding: "0.5rem", marginBottom: "0.5rem" }}
                 />
-                {error && <p style={{ color: "#ef4444" }}>{error}</p>}
+                {error && (
+                    <div style={{ color: "#ef4444", fontSize: "0.9rem" }}>
+                        <p style={{ margin: "0 0 0.3rem" }}>{error}</p>
+                        {mode === "login" && <p style={{ margin: 0, color: "var(--text-dim)", fontSize: "0.8rem" }}>If you previously had an account, it may have been reset. Try creating a new one.</p>}
+                    </div>
+                )}
                 <button type="submit" disabled={loading} style={{ padding: "0.6rem 1.2rem", width: "100%" }}>
                     {loading ? "..." : mode === "login" ? "Log In" : "Create Account"}
                 </button>

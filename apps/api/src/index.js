@@ -9,7 +9,27 @@ import metaRoute from "./routes/meta.js";
 
 const app = express();
 
-app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
+// CORS: accept comma-separated origins in CORS_ORIGIN, or fall back to
+// allowing *.onrender.com + localhost in development.
+const allowedOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(",").map((s) => s.trim())
+    : null;
+
+app.use(cors({
+    origin: (origin, cb) => {
+        // Allow requests with no origin (curl, server-to-server, mobile)
+        if (!origin) return cb(null, true);
+        // Explicit allow-list takes priority
+        if (allowedOrigins && allowedOrigins.includes(origin)) return cb(null, true);
+        // No explicit list — allow Render subdomains + localhost
+        if (!allowedOrigins && (
+            origin.endsWith(".onrender.com") ||
+            origin.startsWith("http://localhost")
+        )) return cb(null, true);
+        cb(null, false);
+    },
+    credentials: true
+}));
 app.use(express.json());
 
 app.use(healthRoute);

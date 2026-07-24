@@ -133,7 +133,7 @@ export default function TeamBuilder() {
     }
 
     return (
-        <div style={{ display: "grid", gridTemplateColumns: "300px 1fr 350px", gap: "1.5rem", padding: "1.5rem", height: "calc(100vh - 60px)", overflow: "hidden" }}>
+        <div className="team-builder-layout">
             {/* Left Column: Controls & Stats */}
             <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1.2rem", overflowY: "auto" }}>
                 <h2 style={{ color: "var(--gold)", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "0.5rem" }}>Tactics</h2>

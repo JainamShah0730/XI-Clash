@@ -68,6 +68,9 @@ export default function MatchViewer() {
         socket.on("connect", () => {
             setConnected(true);
             socket.emit("join_match", { matchId, role });
+        });
+
+        socket.on("joined_match", () => {
             socket.emit("submit_team", {
                 matchId,
                 role,
@@ -115,7 +118,7 @@ export default function MatchViewer() {
 
     if (!kickedOff) {
         return (
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "calc(100vh - 60px)" }}>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "calc(100vh - 60px)", padding: "1rem" }}>
                 <div className="card" style={{ width: "100%", maxWidth: 460, display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                     <h2 style={{ textAlign: "center", color: "var(--gold)", fontSize: "1.8rem" }}>Match Setup</h2>
                     
@@ -170,7 +173,7 @@ export default function MatchViewer() {
             </div>
 
             {/* Main content: pitch left, commentary right */}
-            <div style={{ display: "flex", gap: "1rem", flex: 1, minHeight: 0 }}>
+            <div className="match-viewer-layout">
                 {/* Pitch column */}
                 <div style={{ flex: "1 1 55%", minWidth: 0 }}>
                     <MatchPitch

@@ -34,10 +34,7 @@ export default function App() {
 
     return (
         <div style={{ minHeight: "100vh" }}>
-            <div style={{
-                display: "flex", gap: "0.5rem", padding: "0.9rem 1.2rem",
-                background: "var(--surface)", borderBottom: "1px solid var(--surface-line)", alignItems: "center"
-            }}>
+            <div className="app-header">
                 <h1 style={{ fontSize: "1.3rem", marginRight: "1.5rem", color: "var(--gold)" }}>XI CLASH</h1>
                 {["builder", "match"].map((t) => (
                     <button

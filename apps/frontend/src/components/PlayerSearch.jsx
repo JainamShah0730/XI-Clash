@@ -28,7 +28,7 @@ export default function PlayerSearch({ onPickPlayer, activeSlot, excludedIds }) 
 
     const visibleResults = results.filter((p) => !excludedIds?.has(p.id));
     return (
-        <div className="card" style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, padding: "1.2rem" }}>
+        <div className="card player-search-container">
             <h3 style={{ marginTop: 0, marginBottom: "0.8rem", color: "var(--gold)", fontSize: "1.3rem" }}>
                 {activeSlot ? `Pick a player for ${activeSlot.slot_id} (${activeSlot.position_type})` : "Select a slot on the pitch first"}
             </h3>

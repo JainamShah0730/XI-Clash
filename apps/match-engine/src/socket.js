@@ -61,6 +61,8 @@ export function registerMatchHandlers(io) {
                 homeConnected: !!room.home.socketId,
                 awayConnected: !!room.away.socketId
             });
+
+            socket.emit("joined_match");
         });
 
         socket.on("submit_team", async ({ matchId, role, playerBreakdown, coach, roster, bench }) => {
