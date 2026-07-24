@@ -175,11 +175,3 @@ cd apps\frontend && npm run dev         :: http://localhost:5173
 ```
 
 ---
-
-## Possible next steps
-
-- Manual tactical substitutions (not just injury-triggered)
-- Fully instance-agnostic match simulation (persist simulation progress in Redis so any instance can resume streaming)
-- Tournament/league mode across multiple matches
-- LLM-generated match commentary and pre/post-match analysis via the Anthropic API
-- Extra time and penalty shootouts for a cup-mode match type
