@@ -21,9 +21,10 @@ app.use(cors({
         if (!origin) return cb(null, true);
         // Explicit allow-list takes priority
         if (allowedOrigins && allowedOrigins.includes(origin)) return cb(null, true);
-        // No explicit list — allow Render subdomains + localhost
+        // No explicit list — allow Render subdomains, Vercel subdomains, + localhost
         if (!allowedOrigins && (
             origin.endsWith(".onrender.com") ||
+            origin.endsWith(".vercel.app") ||
             origin.startsWith("http://localhost")
         )) return cb(null, true);
         cb(null, false);
