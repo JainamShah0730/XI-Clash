@@ -19,14 +19,16 @@ app.use(cors({
     origin: (origin, cb) => {
         // Allow requests with no origin (curl, server-to-server, mobile)
         if (!origin) return cb(null, true);
-        // Explicit allow-list takes priority
-        if (allowedOrigins && allowedOrigins.includes(origin)) return cb(null, true);
-        // No explicit list — allow Render subdomains, Vercel subdomains, + localhost
-        if (!allowedOrigins && (
+        // Always allow Vercel and Render subdomains unconditionally for convenience, plus localhost
+        if (
             origin.endsWith(".onrender.com") ||
             origin.endsWith(".vercel.app") ||
             origin.startsWith("http://localhost")
-        )) return cb(null, true);
+        ) return cb(null, true);
+        
+        // Explicit allow-list for custom domains
+        if (allowedOrigins && allowedOrigins.includes(origin)) return cb(null, true);
+        
         cb(null, false);
     },
     credentials: true
