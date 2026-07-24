@@ -175,7 +175,7 @@ export default function MatchViewer() {
             {/* Main content: pitch left, commentary right */}
             <div className="match-viewer-layout">
                 {/* Pitch column */}
-                <div style={{ flex: "1 1 55%", minWidth: 0 }}>
+                <div className="pitch-column">
                     <MatchPitch
                         homeRoster={homeRoster}
                         awayRoster={awayRoster}
@@ -183,12 +183,9 @@ export default function MatchViewer() {
                         cardedPlayers={cardedPlayers}
                     />
 
-                    {/* Last event flash bar */}
+                    {/* Last event flash bar HUD */}
                     {lastEvent && (
-                        <div style={{
-                            marginTop: "0.5rem", padding: "0.5rem 0.75rem", borderRadius: 8,
-                            background: "var(--surface)", border: "1px solid var(--surface-line)",
-                            textAlign: "center", fontSize: "0.9rem", fontWeight: 600,
+                        <div className="event-hud" style={{
                             color: lastEvent.type === "goal" ? "var(--goal-green)"
                                 : lastEvent.type === "red_card" ? "var(--red-card)"
                                 : lastEvent.type === "yellow_card" ? "var(--yellow-card)"
@@ -200,7 +197,7 @@ export default function MatchViewer() {
                 </div>
 
                 {/* Commentary column */}
-                <div style={{ flex: "1 1 45%", minWidth: 0, display: "flex", flexDirection: "column" }}>
+                <div className="commentary-column">
                     <CommentaryFeed events={events} style={{ flex: 1 }} />
                 </div>
             </div>
