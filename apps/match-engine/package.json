@@ -1,0 +1,20 @@
+{
+    "name": "@xi-clash/match-engine",
+    "version": "0.1.0",
+    "type": "module",
+    "main": "src/index.js",
+    "scripts": {
+        "dev": "node --watch src/index.js",
+        "start": "node src/index.js"
+    },
+    "dependencies": {
+        "@socket.io/redis-adapter": "^8.3.0",
+        "@xi-clash/shared": "*",
+        "dotenv": "^16.4.5",
+        "express": "^4.19.2",
+        "redis": "^6.1.0",
+        "seedrandom": "^3.0.5",
+        "socket.io": "^4.7.5",
+        "socket.io-client": "^4.8.3"
+    }
+}

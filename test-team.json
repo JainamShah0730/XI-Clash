@@ -1,0 +1,53 @@
+{
+    "user_id": "c80e0706-bca0-4911-8ac0-1a61a018e410",
+    "formation_id": "9dc275d4-b17f-44fc-b3d0-4170d2ead280",
+    "coach_id": "1cff9ead-1249-4022-bb28-a07af63884e8",
+    "name": "Dream XI",
+    "club_identity": "The Reds",
+    "players": [
+        {
+            "player_id": "c6025ff1-d89e-4f81-8ef2-a5438789b67a",
+            "slot_id": "GK"
+        },
+        {
+            "player_id": "6903bc57-4f7e-4542-bb6a-d3b97f0cf226",
+            "slot_id": "LB"
+        },
+        {
+            "player_id": "d7995834-4f9e-43ea-bc99-60331038d677",
+            "slot_id": "CB1"
+        },
+        {
+            "player_id": "c012ad54-062f-4d3a-b0a6-a61d551e96b4",
+            "slot_id": "CB2"
+        },
+        {
+            "player_id": "cd3d1b53-e840-48b3-816f-9f0d097dd595",
+            "slot_id": "RB"
+        },
+        {
+            "player_id": "ee41b915-f6df-4284-ba1e-4da5627a6dd7",
+            "slot_id": "CM1"
+        },
+        {
+            "player_id": "15600c73-3b9f-4633-bba4-7b678c7fb3ba",
+            "slot_id": "CM2"
+        },
+        {
+            "player_id": "8ba6f10c-e136-44ea-b5ed-7532f3b3a6ff",
+            "slot_id": "CM3"
+        },
+        {
+            "player_id": "1e1ff597-8723-4c79-9811-dce7df5f4c63",
+            "slot_id": "LW"
+        },
+        {
+            "player_id": "e4208836-6acc-4527-a7ad-341cf201a49a",
+            "slot_id": "ST"
+        },
+        {
+            "player_id": "27c5a910-36f3-48e9-baca-952e96569d90",
+            "slot_id": "RW"
+        }
+    ]
+}

@@ -1,0 +1,152 @@
+:root {
+    color-scheme: dark;
+    --bg: #0a0f1c;
+    --surface: #121b2e;
+    --surface-2: #17233b;
+    --surface-line: #223049;
+    --pitch-dark: #0e4023;
+    --pitch-light: #155a30;
+    --pitch-line: rgba(255, 255, 255, 0.35);
+    --gold: #e8b33d;
+    --home: #3b82f6;
+    --away: #f97316;
+    --text: #f5f7fa;
+    --text-dim: #8b96a8;
+    --yellow-card: #f4c430;
+    --red-card: #e63946;
+    --goal-green: #22c55e;
+
+    --font-display: "Oswald", sans-serif;
+    --font-body: "Inter", sans-serif;
+    --font-mono: "JetBrains Mono", monospace;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    background-image: radial-gradient(circle at 20% 0%, #14203a 0%, var(--bg) 55%);
+    color: var(--text);
+    font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin: 0;
+}
+
+button {
+    font-family: var(--font-body);
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(4px);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 0.6rem 1.2rem;
+    transition: all 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+    border-color: var(--gold);
+    background: rgba(232, 179, 61, 0.1);
+    transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+
+.btn-primary {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #1a1305;
+    box-shadow: 0 4px 12px rgba(232, 179, 61, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #f0c257;
+    box-shadow: 0 6px 16px rgba(232, 179, 61, 0.4);
+}
+
+input,
+select {
+    font-family: var(--font-body);
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    transition: all 0.2s ease;
+}
+
+input:focus, select:focus {
+    border-color: var(--gold);
+    background: rgba(0, 0, 0, 0.4);
+    outline: none;
+}
+
+option {
+    background-color: var(--surface);
+    color: var(--text);
+    padding: 0.5rem;
+}
+
+.card {
+    background: rgba(18, 27, 46, 0.65);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.mono {
+    font-family: var(--font-mono);
+}
+
+.badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+}
+
+.badge-gold {
+    background: rgba(232, 179, 61, 0.15);
+    color: var(--gold);
+}
+
+.badge-goal {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--goal-green);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.001ms !important;
+        transition-duration: 0.001ms !important;
+    }
+}
