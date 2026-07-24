@@ -42,6 +42,28 @@ router.get("/players", async (req, res) => {
     }
 });
 
+// GET /players/random — a balanced pool for Draft Mode, weighted so both
+// players can realistically field a full legal XI (not, say, 30 strikers).
+router.get("/players/random", async (req, res) => {
+    const counts = { GK: 4, CB: 6, FB: 6, DM: 3, CM: 6, AM: 3, W: 6, ST: 6 };
+
+    try {
+        const subqueries = Object.entries(counts).map(
+            ([pos, n], i) => `(SELECT * FROM players WHERE position_primary = $${i + 1} ORDER BY random() LIMIT ${n})`
+        );
+        const query = subqueries.join(" UNION ALL ");
+        const values = Object.keys(counts);
+
+        const { rows } = await pool.query(query, values);
+        // Shuffle the combined pool so it's not visibly grouped by position
+        const shuffled = rows.sort(() => Math.random() - 0.5);
+        res.json(shuffled);
+    } catch (err) {
+        console.error("GET /players/random failed:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 router.get("/players/:id", async (req, res) => {
     try {
         const { rows } = await pool.query("SELECT * FROM players WHERE id = $1", [req.params.id]);

@@ -37,6 +37,7 @@ export default function MatchViewer() {
     const [minute, setMinute] = useState(0);
     const [matchEnded, setMatchEnded] = useState(null);
     const [cardedPlayers, setCardedPlayers] = useState({});
+    const [goalScorers, setGoalScorers] = useState({});
 
     const [homeRoster, setHomeRoster] = useState([]);
     const [awayRoster, setAwayRoster] = useState([]);
@@ -93,6 +94,9 @@ export default function MatchViewer() {
             setMinute(e.minute);
             if (e.type === "goal") {
                 setScore((prev) => ({ ...prev, [e.team]: prev[e.team] + 1 }));
+                if (e.player) {
+                    setGoalScorers((prev) => ({ ...prev, [e.player]: (prev[e.player] || 0) + 1 }));
+                }
                 setScoreFlash(true);
                 setTimeout(() => setScoreFlash(false), 900);
             }
@@ -181,6 +185,7 @@ export default function MatchViewer() {
                         awayRoster={awayRoster}
                         lastEvent={lastEvent}
                         cardedPlayers={cardedPlayers}
+                        goalScorers={goalScorers}
                     />
 
                     {/* Last event flash bar HUD */}

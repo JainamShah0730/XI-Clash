@@ -1,4 +1,4 @@
-export default function MatchPitch({ homeRoster, awayRoster, lastEvent, cardedPlayers }) {
+export default function MatchPitch({ homeRoster, awayRoster, lastEvent, cardedPlayers, goalScorers }) {
     // Power-curve mapping stretches the defensive end so GK / CB tokens don't overlap.
     // raw t in [0,1] → pow(t, 0.8) expands small y values (own-goal region).
     const spreadY = (y) => Math.pow(y / 100, 0.8);
@@ -27,7 +27,8 @@ export default function MatchPitch({ homeRoster, awayRoster, lastEvent, cardedPl
     function renderTeamTokens(roster, toScreen, side) {
         return roster.map((p) => {
             const { sx, sy } = toScreen(p);
-            const card = cardedPlayers[p.name];
+            const card = cardedPlayers?.[p.name];
+            const goals = goalScorers?.[p.name] || 0;
             const isHighlighted = lastEvent?.player === p.name;
             const baseColor = side === "home" ? "var(--home)" : "var(--away)";
 
@@ -42,6 +43,9 @@ export default function MatchPitch({ homeRoster, awayRoster, lastEvent, cardedPl
                     <circle r="3.2" fill={baseColor} stroke="#0a0f1c" strokeWidth="0.4" />
                     {card && (
                         <rect x="2" y="-4.5" width="1.6" height="2.5" rx="0.2" fill={card === "red" ? "var(--red-card)" : "var(--yellow-card)"} />
+                    )}
+                    {goals > 0 && (
+                        <text x="-4" y="-2" fontSize="2.5">⚽</text>
                     )}
                     <text y="6" textAnchor="middle" fontSize="2.2" fill="var(--text)" fontFamily="var(--font-body)" fontWeight="600">
                         {p.name.split(" ").slice(-1)[0]}
