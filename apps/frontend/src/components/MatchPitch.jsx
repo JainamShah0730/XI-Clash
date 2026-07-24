@@ -1,7 +1,10 @@
 export default function MatchPitch({ homeRoster, awayRoster, lastEvent, cardedPlayers, goalScorers }) {
-    // Power-curve mapping stretches the defensive end so GK / CB tokens don't overlap.
-    // raw t in [0,1] → pow(t, 0.8) expands small y values (own-goal region).
-    const spreadY = (y) => Math.pow(y / 100, 0.8);
+    // Symmetrically expand the ends of the pitch (near y=0 and y=100) 
+    // to prevent GK/CB overlap, while keeping the midfield (y=50) perfectly centered.
+    const spreadY = (y) => {
+        const t = y / 100;
+        return t + 0.1 * Math.sin(2 * Math.PI * t);
+    };
     const toHomeScreen = (slot) => ({ sx: 5 + spreadY(slot.y) * 56, sy: 8 + (slot.x / 100) * 59 });
     const toAwayScreen = (slot) => ({ sx: 115 - spreadY(slot.y) * 56, sy: 8 + (slot.x / 100) * 59 });
 
@@ -45,7 +48,7 @@ export default function MatchPitch({ homeRoster, awayRoster, lastEvent, cardedPl
                         <rect x="2" y="-4.5" width="1.6" height="2.5" rx="0.2" fill={card === "red" ? "var(--red-card)" : "var(--yellow-card)"} />
                     )}
                     {goals > 0 && (
-                        <text x="-4" y="-2" fontSize="2.5">⚽</text>
+                        <text x="-4" y="-2" fontSize="2.5">{"⚽".repeat(goals)}</text>
                     )}
                     <text y="6" textAnchor="middle" fontSize="2.2" fill="var(--text)" fontFamily="var(--font-body)" fontWeight="600">
                         {p.name.split(" ").slice(-1)[0]}

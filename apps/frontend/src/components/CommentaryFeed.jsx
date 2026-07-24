@@ -27,7 +27,10 @@ export default function CommentaryFeed({ events, style }) {
                     }}
                 >
                     <span className="mono badge-gold" style={{ marginRight: "0.5rem" }}>{e.minute}'</span>
-                    <span style={{ color: eventBorder[e.type] ? "var(--text)" : "var(--text-dim)" }}>{e.message}</span>
+                    <span style={{ color: eventBorder[e.type] ? "var(--text)" : "var(--text-dim)" }}>
+                        {e.type === "goal" && <span style={{ marginRight: "4px" }}>⚽</span>}
+                        {e.message}
+                    </span>
                 </div>
             ))}
             <div ref={bottomRef} />
