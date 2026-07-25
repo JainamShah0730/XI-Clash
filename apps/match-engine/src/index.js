@@ -3,6 +3,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { createAdapter } from "@socket.io/redis-adapter";
 import "dotenv/config";
+console.log("DEEPSEEK_API_KEY loaded:", !!process.env.DEEPSEEK_API_KEY);
 import { registerDraftHandlers } from "./draft.js";
 import { registerMatchHandlers } from "./socket.js";
 import { pubClient, subClient, connectRedis } from "./redisClient.js";

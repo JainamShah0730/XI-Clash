@@ -38,9 +38,10 @@ export default function MatchViewer() {
     const [matchEnded, setMatchEnded] = useState(null);
     const [cardedPlayers, setCardedPlayers] = useState({});
     const [goalScorers, setGoalScorers] = useState({});
-
     const [homeRoster, setHomeRoster] = useState([]);
     const [awayRoster, setAwayRoster] = useState([]);
+    const [aiPreview, setAiPreview] = useState(null);
+    const [aiAnalysis, setAiAnalysis] = useState(null);
 
     const socketRef = useRef(null);
 
@@ -84,7 +85,11 @@ export default function MatchViewer() {
 
         socket.on("status", (d) => setStatusMsg(d.message));
         socket.on("error_message", (d) => setStatusMsg(`Error: ${d.message}`));
-        socket.on("kickoff", (d) => { setKickedOff(true); setStatusMsg(d.message); });
+        socket.on("kickoff", (d) => {
+            setKickedOff(true);
+            setStatusMsg(d.message);
+            if (d.preview) setAiPreview(d.preview);
+        });
         socket.on("rosters", (d) => {
             setHomeRoster(d.home || []);
             setAwayRoster(d.away || []);
@@ -115,7 +120,14 @@ export default function MatchViewer() {
             }
         });
 
-        socket.on("match_ended", (d) => { setMatchEnded(d); setStatusMsg("Full-time!"); });
+        socket.on("match_ended", (d) => {
+            setMatchEnded(d);
+            setStatusMsg("Full-time!");
+            // Authoritative score from the simulation — corrects any frontend
+            // counting drift (e.g. from a past double-start race)
+            if (d.score) setScore(d.score);
+            if (d.analysis) setAiAnalysis(d.analysis);
+        });
     }
 
     const lastEvent = events[events.length - 1];
@@ -125,35 +137,35 @@ export default function MatchViewer() {
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "calc(100vh - 60px)", padding: "1rem" }}>
                 <div className="card" style={{ width: "100%", maxWidth: 460, display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                     <h2 style={{ textAlign: "center", color: "var(--gold)", fontSize: "1.8rem" }}>Match Setup</h2>
-                    
+
                     <label style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                         <span style={{ fontWeight: 600, color: "var(--text-dim)" }}>Match Code (Share this with opponent)</span>
-                        <input 
-                            value={matchId} 
-                            onChange={(e) => setMatchId(e.target.value.toUpperCase())} 
-                            style={{ fontSize: "1.2rem", textAlign: "center", letterSpacing: "2px", fontWeight: "bold" }} 
+                        <input
+                            value={matchId}
+                            onChange={(e) => setMatchId(e.target.value.toUpperCase())}
+                            style={{ fontSize: "1.2rem", textAlign: "center", letterSpacing: "2px", fontWeight: "bold" }}
                         />
                     </label>
 
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                         <label style={{ display: "flex", flexDirection: "column", gap: "0.5rem", position: "relative", zIndex: 20 }}>
                             <span style={{ fontWeight: 600, color: "var(--text-dim)" }}>Side</span>
-                            <CustomSelect 
-                                value={role} 
-                                onChange={setRole} 
+                            <CustomSelect
+                                value={role}
+                                onChange={setRole}
                                 options={[
                                     { value: "home", label: "Home (Blue)" },
                                     { value: "away", label: "Away (Orange)" }
-                                ]} 
+                                ]}
                             />
                         </label>
-                        
+
                         <label style={{ display: "flex", flexDirection: "column", gap: "0.5rem", position: "relative", zIndex: 10 }}>
                             <span style={{ fontWeight: 600, color: "var(--text-dim)" }}>Your Team</span>
-                            <CustomSelect 
-                                value={selectedTeamId} 
-                                onChange={setSelectedTeamId} 
-                                options={teams.map((t) => ({ value: t.id, label: `${t.name} (${t.formation_name})` }))} 
+                            <CustomSelect
+                                value={selectedTeamId}
+                                onChange={setSelectedTeamId}
+                                options={teams.map((t) => ({ value: t.id, label: `${t.name} (${t.formation_name})` }))}
                             />
                         </label>
                     </div>
@@ -161,7 +173,7 @@ export default function MatchViewer() {
                     <button onClick={handleJoinAndSubmit} disabled={!selectedTeamId} className="btn-primary" style={{ padding: "0.8rem", fontSize: "1.1rem", marginTop: "0.5rem" }}>
                         Join Match & Submit Team
                     </button>
-                    
+
                     {statusMsg && <div style={{ textAlign: "center", padding: "0.5rem", borderRadius: 8, background: "rgba(0,0,0,0.2)", color: "var(--gold)", fontSize: "0.9rem" }}>{statusMsg}</div>}
                     {connected && !kickedOff && <div style={{ textAlign: "center", color: "var(--text-dim)", fontSize: "0.9rem" }}>Connected — waiting for opponent...</div>}
                 </div>
@@ -170,9 +182,15 @@ export default function MatchViewer() {
     }
 
     return (
-        <div style={{ padding: "1rem", height: "calc(100vh - 60px)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-            {/* Scoreboard */}
-            <div style={{ marginBottom: "0.75rem", display: "flex", justifyContent: "center" }}>
+        <div style={{ padding: "1rem", height: "calc(100vh - 60px)", display: "flex", flexDirection: "column", overflow: "auto" }}>
+            <div style={{ marginBottom: "0.75rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", flexShrink: 0 }}>
+                {aiPreview && (
+                    <div className="card" style={{ borderColor: "var(--cyan)", fontStyle: "italic", maxWidth: 600, width: "100%" }}>
+                        <span className="mono badge-cyan" style={{ marginRight: "0.5rem" }}>AI PREVIEW</span>
+                        {aiPreview}
+                    </div>
+                )}
+
                 <ScoreboardBug score={score} minute={minute} flash={scoreFlash} />
             </div>
 
@@ -193,8 +211,8 @@ export default function MatchViewer() {
                         <div className="event-hud" style={{
                             color: lastEvent.type === "goal" ? "var(--goal-green)"
                                 : lastEvent.type === "red_card" ? "var(--red-card)"
-                                : lastEvent.type === "yellow_card" ? "var(--yellow-card)"
-                                : "var(--text)"
+                                    : lastEvent.type === "yellow_card" ? "var(--yellow-card)"
+                                        : "var(--text)"
                         }}>
                             {lastEvent.message}
                         </div>
@@ -211,7 +229,7 @@ export default function MatchViewer() {
             {matchEnded && (
                 <div className="card" style={{
                     marginTop: "0.75rem", border: "1px solid var(--goal-green)",
-                    display: "flex", gap: "2rem", alignItems: "center", flexWrap: "wrap"
+                    display: "flex", gap: "2rem", alignItems: "flex-start", flexWrap: "wrap", flexShrink: 0
                 }}>
                     <h3 style={{ color: "var(--gold)" }}>Full-Time — {matchEnded.score.home} - {matchEnded.score.away}</h3>
                     <span style={{ color: "var(--text-dim)", fontSize: "0.85rem" }}>
@@ -222,6 +240,12 @@ export default function MatchViewer() {
                             ? Object.entries(matchEnded.yellowCounts).map(([n, c]) => `${n} (${c})`).join(", ")
                             : "None"}
                     </span>
+                    {aiAnalysis && (
+                        <div style={{ width: "100%", paddingTop: "0.75rem", borderTop: "1px solid var(--line)", fontStyle: "italic" }}>
+                            <span className="mono badge-cyan" style={{ marginRight: "0.5rem" }}>AI ANALYSIS</span>
+                            {aiAnalysis}
+                        </div>
+                    )}
                 </div>
             )}
         </div>

@@ -1,6 +1,7 @@
 import { computeTeamProfile } from "./simulation/teamProfile.js";
 import { simulateMatch } from "./simulation/simulateMatch.js";
 import { pubClient } from "./redisClient.js";
+import { generatePreMatchPreview, generateMomentumSummary, generatePostMatchAnalysis } from "./lib/commentaryAI.js";
 
 const MS_PER_SIM_MINUTE = 800;
 const ROOM_TTL_SECONDS = 3600; // auto-expire abandoned lobbies after an hour
@@ -91,6 +92,10 @@ export function registerMatchHandlers(io) {
             }
 
             if (room.started || localIntervals.has(matchId)) return; // already running somewhere
+            // Claim this match synchronously BEFORE any async work to prevent
+            // the TOCTOU race where both players' submit_team handlers pass
+            // the guard and fire startMatch twice (causing double events/scores).
+            localIntervals.set(matchId, true);
             await startMatch(io, matchId, room);
         });
 
@@ -117,6 +122,7 @@ export function registerMatchHandlers(io) {
 async function startMatch(io, matchId, room) {
     room.started = true;
     await saveRoom(matchId, room);
+    // localIntervals is already set as a sentinel by the caller
 
     const homeProfile = { profile: computeTeamProfile(room.home.team.playerBreakdown, room.home.team.coach, room.home.team.bench) };
     const awayProfile = { profile: computeTeamProfile(room.away.team.playerBreakdown, room.away.team.coach, room.away.team.bench) };
@@ -124,24 +130,68 @@ async function startMatch(io, matchId, room) {
     const result = simulateMatch({ home: homeProfile, away: awayProfile, seed: matchId });
 
     io.to(matchId).emit("rosters", { home: room.home.roster, away: room.away.roster });
-    io.to(matchId).emit("kickoff", { message: "Both teams ready — match starting!" });
+    io.to(matchId).emit("status", { message: "Generating AI match preview..." });
+
+    // Pre-match preview — awaited before kickoff so it can be shown immediately.
+    // If DeepSeek is unavailable or errors, this resolves to null and we just skip it.
+    const preview = await generatePreMatchPreview("Home", "Away", homeProfile.profile, awayProfile.profile);
+
+    // Momentum summaries every ~15 sim-minutes — computed upfront (not mid-stream)
+    // so the whole event timeline stays deterministic and pre-computed, same as
+    // the rest of the simulation. Each summary gets inserted as a normal event
+    // in the timeline, timestamped at the window's end minute.
+    const WINDOW = 15;
+    let runningScore = { home: 0, away: 0 };
+    let cursorMinute = 0;
+    const aiEvents = [];
+
+    for (let windowEnd = WINDOW; windowEnd <= 90; windowEnd += WINDOW) {
+        const windowEvents = result.events.filter((e) => e.minute > cursorMinute && e.minute <= windowEnd);
+        for (const e of windowEvents) {
+            if (e.type === "goal") runningScore[e.team]++;
+        }
+
+        const summary = await generateMomentumSummary(windowEvents, runningScore, `minute ${cursorMinute}-${windowEnd}`);
+        if (summary) {
+            aiEvents.push({
+                minute: windowEnd,
+                type: "ai_commentary",
+                team: null,
+                message: summary
+            });
+        }
+        cursorMinute = windowEnd;
+    }
+
+    // Post-match analysis, generated once the full result is known
+    const postMatch = await generatePostMatchAnalysis(result.score, result.events, "Home", "Away");
+
+    // Merge AI events into the timeline and re-sort by minute so they stream
+    // in the right place alongside normal match events.
+    const mergedEvents = [...result.events, ...aiEvents].sort((a, b) => a.minute - b.minute);
+
+    io.to(matchId).emit("kickoff", {
+        message: "Both teams ready — match starting!",
+        preview: preview || undefined
+    });
 
     let cursor = 0;
-    const intervalId = setInterval(async () => {
-        if (cursor >= result.events.length) {
-            clearInterval(intervalId);
+    room.intervalId = setInterval(() => {
+        if (cursor >= mergedEvents.length) {
+            clearInterval(room.intervalId);
             localIntervals.delete(matchId);
             io.to(matchId).emit("match_ended", {
                 score: result.score,
                 redCards: result.redCards,
-                yellowCounts: result.yellowCounts
+                yellowCounts: result.yellowCounts,
+                analysis: postMatch || undefined
             });
-            await deleteRoom(matchId);
+            deleteRoom(matchId);
             return;
         }
-        io.to(matchId).emit("match_event", result.events[cursor]);
+        io.to(matchId).emit("match_event", mergedEvents[cursor]);
         cursor++;
     }, MS_PER_SIM_MINUTE);
 
-    localIntervals.set(matchId, intervalId);
-}
+    localIntervals.set(matchId, room.intervalId); // upgrade sentinel to real interval handle
+} 

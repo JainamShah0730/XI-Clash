@@ -53,41 +53,43 @@ export default function Pitch({ formation, assignments, onSlotClick }) {
             {formation.slots_json.map((slot) => {
                 const assigned = assignments[slot.slot_id];
                 const cy = toScreenY(slot.y);
+                // Clamp x to prevent cards from bleeding over the touchlines (card half-width is 7)
+                const cx = Math.max(9, Math.min(91, slot.x));
 
                 return (
-                    <g key={slot.slot_id} transform={`translate(${slot.x}, ${cy})`} onClick={() => onSlotClick(slot)} style={{ cursor: "pointer" }}>
+                    <g key={slot.slot_id} transform={`translate(${cx}, ${cy})`} onClick={() => onSlotClick(slot)} style={{ cursor: "pointer" }}>
                         {assigned ? (
                             <g transform="translate(0, -1.5)">
                                 {/* Card Background */}
-                                <rect x="-8.5" y="-7.5" width="17" height="15" rx="1.5" fill="#0f172a" stroke="rgba(255,255,255,0.15)" strokeWidth="0.3" />
+                                <rect x="-7" y="-6" width="14" height="12" rx="1.2" fill="#0f172a" stroke="rgba(255,255,255,0.15)" strokeWidth="0.3" />
                                 
                                 {/* Top Row: Position and OVR */}
-                                <text x="-7" y="-4" fontSize="2" fill="#10b981" fontFamily="var(--font-mono)" fontWeight="700">
+                                <text x="-5.5" y="-3" fontSize="1.6" fill="#10b981" fontFamily="var(--font-mono)" fontWeight="700">
                                     {slot.position_type}
                                 </text>
-                                <text x="7" y="-4" textAnchor="end" fontSize="2" fill="#fff" fontFamily="var(--font-mono)" fontWeight="700">
+                                <text x="5.5" y="-3" textAnchor="end" fontSize="1.6" fill="#fff" fontFamily="var(--font-mono)" fontWeight="700">
                                     {assigned.ovr_base || 85}
                                 </text>
                                 
                                 {/* Middle Row: Player Name */}
-                                <text y="0.5" textAnchor="middle" fontSize="1.8" fill="var(--text)" fontFamily="var(--font-body)" fontWeight="600">
+                                <text y="1" textAnchor="middle" fontSize="1.5" fill="var(--text)" fontFamily="var(--font-body)" fontWeight="600">
                                     {assigned.name.split(" ").slice(-1)[0]}
                                 </text>
                                 
                                 {/* Bottom Row: Chemistry Dots */}
-                                <g transform="translate(0, 4)">
-                                    <circle cx="-1.5" cy="0" r="0.6" fill="var(--gold)" />
-                                    <circle cx="0" cy="0" r="0.6" fill="var(--gold)" />
-                                    <circle cx="1.5" cy="0" r="0.6" fill="var(--gold)" />
+                                <g transform="translate(0, 3.5)">
+                                    <circle cx="-1.2" cy="0" r="0.5" fill="var(--gold)" />
+                                    <circle cx="0" cy="0" r="0.5" fill="var(--gold)" />
+                                    <circle cx="1.2" cy="0" r="0.5" fill="var(--gold)" />
                                 </g>
                             </g>
                         ) : (
                             <g transform="translate(0, -1.5)">
-                                <rect x="-8.5" y="-7.5" width="17" height="15" rx="1.5" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.25)" strokeWidth="0.3" strokeDasharray="1 1" />
-                                <text y="-2" textAnchor="middle" fontSize="3" fill="rgba(255,255,255,0.4)" fontFamily="var(--font-mono)" fontWeight="700">
+                                <rect x="-7" y="-6" width="14" height="12" rx="1.2" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.25)" strokeWidth="0.3" strokeDasharray="1 1" />
+                                <text y="-1.2" textAnchor="middle" fontSize="2.4" fill="rgba(255,255,255,0.4)" fontFamily="var(--font-mono)" fontWeight="700">
                                     {slot.position_type}
                                 </text>
-                                <text y="3.5" textAnchor="middle" fontSize="1.8" fill="rgba(255,255,255,0.25)" fontFamily="var(--font-body)" fontWeight="600">
+                                <text y="3" textAnchor="middle" fontSize="1.5" fill="rgba(255,255,255,0.25)" fontFamily="var(--font-body)" fontWeight="600">
                                     + Add
                                 </text>
                             </g>
