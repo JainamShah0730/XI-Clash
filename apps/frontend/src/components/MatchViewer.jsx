@@ -36,8 +36,6 @@ export default function MatchViewer() {
     const [score, setScore] = useState({ home: 0, away: 0 });
     const [minute, setMinute] = useState(0);
     const [matchEnded, setMatchEnded] = useState(null);
-    const [cardedPlayers, setCardedPlayers] = useState({});
-    const [goalScorers, setGoalScorers] = useState({});
     const [homeRoster, setHomeRoster] = useState([]);
     const [awayRoster, setAwayRoster] = useState([]);
     const [aiPreview, setAiPreview] = useState(null);
@@ -100,17 +98,8 @@ export default function MatchViewer() {
             setMinute(e.minute);
             if (e.type === "goal") {
                 setScore((prev) => ({ ...prev, [e.team]: prev[e.team] + 1 }));
-                if (e.player) {
-                    setGoalScorers((prev) => ({ ...prev, [e.player]: (prev[e.player] || 0) + 1 }));
-                }
                 setScoreFlash(true);
                 setTimeout(() => setScoreFlash(false), 900);
-            }
-            if (e.type === "yellow_card" && e.player) {
-                setCardedPlayers((prev) => ({ ...prev, [e.player]: prev[e.player] === "yellow" ? "red" : "yellow" }));
-            }
-            if (e.type === "red_card" && e.player) {
-                setCardedPlayers((prev) => ({ ...prev, [e.player]: "red" }));
             }
             if (e.type === "substitution" && e.playerOut && e.playerIn) {
                 const swapRoster = (roster) => roster.map((p) =>
@@ -130,6 +119,26 @@ export default function MatchViewer() {
     }
 
     const lastEvent = events[events.length - 1];
+
+    const goalScorers = events.reduce((acc, e) => {
+        if (e.type === "goal" && e.player) {
+            const key = `${e.team}-${e.player}`;
+            acc[key] = (acc[key] || 0) + 1;
+        }
+        return acc;
+    }, {});
+
+    const cardedPlayers = events.reduce((acc, e) => {
+        if (e.type === "yellow_card" && e.player) {
+            const key = `${e.team}-${e.player}`;
+            acc[key] = acc[key] === "yellow" ? "red" : "yellow";
+        }
+        if (e.type === "red_card" && e.player) {
+            const key = `${e.team}-${e.player}`;
+            acc[key] = "red";
+        }
+        return acc;
+    }, {});
 
     if (!kickedOff) {
         return (
@@ -206,7 +215,7 @@ export default function MatchViewer() {
                     />
 
                     {/* Last event flash bar HUD */}
-                    {lastEvent && (
+                    {lastEvent && !matchEnded && (
                         <div className="event-hud" style={{
                             color: lastEvent.type === "goal" ? "var(--goal-green)"
                                 : lastEvent.type === "red_card" ? "var(--red-card)"

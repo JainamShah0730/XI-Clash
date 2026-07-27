@@ -79,7 +79,7 @@ router.get("/auth/me", requireAuth, async (req, res) => {
 router.get("/leaderboard", async (req, res) => {
     try {
         const { rows } = await pool.query(
-            `SELECT username, elo_rating, created_at
+            `SELECT username, elo_rating, created
        FROM users
        ORDER BY elo_rating DESC
        LIMIT 20`

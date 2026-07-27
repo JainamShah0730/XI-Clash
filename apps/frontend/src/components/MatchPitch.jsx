@@ -8,15 +8,19 @@ export default function MatchPitch({ homeRoster, awayRoster, lastEvent, cardedPl
     const toHomeScreen = (slot) => ({ sx: 5 + spreadY(slot.y) * 56, sy: 8 + (slot.x / 100) * 59 });
     const toAwayScreen = (slot) => ({ sx: 115 - spreadY(slot.y) * 56, sy: 8 + (slot.x / 100) * 59 });
 
-    const findPlayerScreenPos = (name) => {
-        const h = homeRoster.find((p) => p.name === name);
-        if (h) return toHomeScreen(h);
-        const a = awayRoster.find((p) => p.name === name);
-        if (a) return toAwayScreen(a);
+    const findPlayerScreenPos = (event) => {
+        if (!event?.player) return null;
+        if (event.team === "home") {
+            const h = homeRoster.find((p) => p.name === event.player);
+            if (h) return toHomeScreen(h);
+        } else if (event.team === "away") {
+            const a = awayRoster.find((p) => p.name === event.player);
+            if (a) return toAwayScreen(a);
+        }
         return null;
     };
 
-    const highlightPos = lastEvent?.player ? findPlayerScreenPos(lastEvent.player) : null;
+    const highlightPos = findPlayerScreenPos(lastEvent);
     const ballTarget = highlightPos || { sx: 60, sy: 37.5 };
 
     const flashColor = lastEvent?.type === "goal" ? "var(--goal-green)"
@@ -30,9 +34,9 @@ export default function MatchPitch({ homeRoster, awayRoster, lastEvent, cardedPl
     function renderTeamTokens(roster, toScreen, side) {
         return roster.map((p) => {
             const { sx, sy } = toScreen(p);
-            const card = cardedPlayers?.[p.name];
-            const goals = goalScorers?.[p.name] || 0;
-            const isHighlighted = lastEvent?.player === p.name;
+            const card = cardedPlayers?.[`${side}-${p.name}`];
+            const goals = goalScorers?.[`${side}-${p.name}`] || 0;
+            const isHighlighted = lastEvent?.player === p.name && lastEvent?.team === side;
             const baseColor = side === "home" ? "var(--home)" : "var(--away)";
 
             return (
@@ -50,7 +54,7 @@ export default function MatchPitch({ homeRoster, awayRoster, lastEvent, cardedPl
                     {goals > 0 && (
                         <text x="-4" y="-2" fontSize="2.5">{"⚽".repeat(goals)}</text>
                     )}
-                    <text y="6" textAnchor="middle" fontSize="2.2" fill="var(--text)" fontFamily="var(--font-body)" fontWeight="600">
+                    <text y="6" textAnchor="middle" fontSize={p.name.split(" ").slice(-1)[0].length > 9 ? "1.7" : "2.2"} fill="var(--text)" fontFamily="var(--font-body)" fontWeight="600">
                         {p.name.split(" ").slice(-1)[0]}
                     </text>
                 </g>

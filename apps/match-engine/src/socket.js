@@ -68,6 +68,13 @@ export function registerMatchHandlers(io) {
 
         socket.on("submit_team", async ({ matchId, role, playerBreakdown, coach, roster, bench, userId }) => {
 
+            if (role !== "home" && role !== "away") {
+                socket.emit("error_message", { message: "role must be 'home' or 'away'" });
+                return;
+            }
+
+            const room = await getRoom(matchId);
+
             if (room[role].socketId !== socket.id) {
                 socket.emit("error_message", { message: "You are not registered as this role in this match." });
                 return;

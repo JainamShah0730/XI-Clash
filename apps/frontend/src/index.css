@@ -173,7 +173,8 @@ option {
 .match-viewer-layout {
     display: flex;
     gap: 1rem;
-    flex: 1 0 auto;
+    flex: 1 0 0%;
+    min-height: 450px;
 }
 
 .pitch-column {
