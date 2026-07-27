@@ -79,7 +79,8 @@ export default function MatchViewer() {
                 playerBreakdown: team.playerBreakdown,
                 coach: team.tactic || { aggression: 50, attack_bias: 50, def_line_height: 50 },
                 roster,
-                bench: team.bench || []
+                bench: team.bench || [],
+                userId: team.user_id
             });
         });
 
@@ -123,10 +124,8 @@ export default function MatchViewer() {
         socket.on("match_ended", (d) => {
             setMatchEnded(d);
             setStatusMsg("Full-time!");
-            // Authoritative score from the simulation — corrects any frontend
-            // counting drift (e.g. from a past double-start race)
-            if (d.score) setScore(d.score);
             if (d.analysis) setAiAnalysis(d.analysis);
+            setTimeout(() => onEloUpdate?.(), 1500); // small delay so the elo update has time to land server-side
         });
     }
 

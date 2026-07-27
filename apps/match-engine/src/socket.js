@@ -66,8 +66,7 @@ export function registerMatchHandlers(io) {
             socket.emit("joined_match");
         });
 
-        socket.on("submit_team", async ({ matchId, role, playerBreakdown, coach, roster, bench }) => {
-            const room = await getRoom(matchId);
+        socket.on("submit_team", async ({ matchId, role, playerBreakdown, coach, roster, bench, userId }) => {
 
             if (room[role].socketId !== socket.id) {
                 socket.emit("error_message", { message: "You are not registered as this role in this match." });
@@ -76,6 +75,7 @@ export function registerMatchHandlers(io) {
 
             room[role].team = { playerBreakdown, coach, bench: bench || [] };
             room[role].roster = roster || [];
+            room[role].userId = userId || null;
             room[role].ready = true;
             await saveRoom(matchId, room);
 
@@ -186,6 +186,13 @@ async function startMatch(io, matchId, room) {
                 yellowCounts: result.yellowCounts,
                 analysis: postMatch || undefined
             });
+
+            // Report result for Elo update — fire-and-forget-ish, but logged if it fails
+            // so a broken Elo call never blocks or crashes the match itself.
+            reportEloResult(room.home.userId, room.away.userId, result.score).catch((err) => {
+                console.error("Failed to report match result for Elo:", err);
+            });
+
             deleteRoom(matchId);
             return;
         }
@@ -194,4 +201,27 @@ async function startMatch(io, matchId, room) {
     }, MS_PER_SIM_MINUTE);
 
     localIntervals.set(matchId, room.intervalId); // upgrade sentinel to real interval handle
-} 
+}
+
+const API_URL = process.env.API_URL || "http://localhost:4000";
+
+async function reportEloResult(homeUserId, awayUserId, score) {
+    const res = await fetch(`${API_URL}/matches/report-result`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            homeUserId,
+            awayUserId,
+            homeScore: score.home,
+            awayScore: score.away
+        })
+    });
+    const data = await res.json();
+    if (data.skipped) {
+        console.log("Elo skipped:", data.reason);
+    } else if (data.error) {
+        console.error("Elo report error:", data.error);
+    } else {
+        console.log(`Elo updated — home: ${data.home.newRating} (${data.home.change >= 0 ? "+" : ""}${data.home.change}), away: ${data.away.newRating} (${data.away.change >= 0 ? "+" : ""}${data.away.change})`);
+    }
+}

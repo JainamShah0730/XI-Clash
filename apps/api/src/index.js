@@ -6,6 +6,7 @@ import healthRoute from "./routes/health.js";
 import playersRoute from "./routes/players.js";
 import teamsRoute from "./routes/teams.js";
 import metaRoute from "./routes/meta.js";
+import eloRoute from "./routes/elo.js";
 
 const app = express();
 
@@ -25,10 +26,10 @@ app.use(cors({
             origin.endsWith(".vercel.app") ||
             origin.startsWith("http://localhost")
         ) return cb(null, true);
-        
+
         // Explicit allow-list for custom domains
         if (allowedOrigins && allowedOrigins.includes(origin)) return cb(null, true);
-        
+
         cb(null, false);
     },
     credentials: true
@@ -40,6 +41,7 @@ app.use(playersRoute);
 app.use(teamsRoute);
 app.use(metaRoute);
 app.use(authRoute);
+app.use(eloRoute);
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => {

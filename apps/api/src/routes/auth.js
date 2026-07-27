@@ -75,4 +75,20 @@ router.get("/auth/me", requireAuth, async (req, res) => {
     }
 });
 
+// GET /leaderboard — top players by Elo rating, public (no auth required to view)
+router.get("/leaderboard", async (req, res) => {
+    try {
+        const { rows } = await pool.query(
+            `SELECT username, elo_rating, created_at
+       FROM users
+       ORDER BY elo_rating DESC
+       LIMIT 20`
+        );
+        res.json(rows);
+    } catch (err) {
+        console.error("GET /leaderboard failed:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 export default router;

@@ -5,7 +5,7 @@ import AuthPanel from "./components/AuthPanel.jsx";
 import { fetchCurrentUser, clearToken } from "./lib/auth.js";
 import DraftRoom from "./components/DraftRoom.jsx";
 import DraftAssign from "./components/DraftAssign.jsx";
-
+import Leaderboard from "./components/Leaderboard.jsx";
 
 export default function App() {
     const [tab, setTab] = useState("builder");
@@ -40,7 +40,7 @@ export default function App() {
         <div style={{ minHeight: "100vh" }}>
             <div className="app-header">
                 <h1 style={{ fontSize: "1.3rem", marginRight: "1.5rem", color: "var(--gold)" }}>XI CLASH</h1>
-                {["builder", "draft", "match"].map((t) => (
+                {["builder", "draft", "match", "leaderboard"].map((t) => (
                     <button
                         key={t}
                         onClick={() => setTab(t)}
@@ -49,19 +49,22 @@ export default function App() {
                             borderRadius: 0, color: tab === t ? "var(--text)" : "var(--text-dim)", padding: "0.5rem 0.2rem"
                         }}
                     >
-                        {t === "builder" ? "Team Builder" : t === "draft" ? "Draft Mode" : "Play Match"}
+                        {t === "builder" ? "Team Builder" : t === "draft" ? "Draft Mode" : t === "match" ? "Play Match" : "Leaderboard"}
                     </button>
                 ))}
-                <span style={{ marginLeft: "auto", color: "var(--text-dim)", fontSize: "0.85rem" }}>{user.username}</span>
+                <span className="mono" style={{ marginLeft: "auto", color: "var(--text-dim)", fontSize: "0.8rem" }}>
+                    {user.username} <span style={{ color: "var(--gold)" }}>· {user.elo_rating}</span>
+                </span>
                 <button onClick={handleLogout}>Log Out</button>
             </div>
 
             {tab === "builder" && <TeamBuilder />}
-            {tab === "match" && <MatchViewer />}
+            {tab === "match" && <MatchViewer onEloUpdate={() => fetchCurrentUser().then(setUser)} />}
             {tab === "draft" && !draftedRoster && <DraftRoom onDraftComplete={setDraftedRoster} />}
             {tab === "draft" && draftedRoster && (
                 <DraftAssign draftedRoster={draftedRoster} onSaved={() => { setDraftedRoster(null); setTab("match"); }} />
             )}
+            {tab === "leaderboard" && <Leaderboard currentUsername={user.username} />}
         </div>
     );
 }
