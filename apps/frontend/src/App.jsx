@@ -6,6 +6,8 @@ import { fetchCurrentUser, clearToken } from "./lib/auth.js";
 import DraftRoom from "./components/DraftRoom.jsx";
 import DraftAssign from "./components/DraftAssign.jsx";
 import Leaderboard from "./components/Leaderboard.jsx";
+import LearnHub from "./components/LearnHub.jsx";
+
 
 export default function App() {
     const [tab, setTab] = useState("builder");
@@ -39,8 +41,8 @@ export default function App() {
     return (
         <div style={{ minHeight: "100vh" }}>
             <div className="app-header">
-                <h1 style={{ fontSize: "1.3rem", marginRight: "1.5rem", color: "var(--gold)" }}>XI CLASH</h1>
-                {["builder", "draft", "match", "leaderboard"].map((t) => (
+                <h1 style={{ fontSize: "1.3rem", marginRight: "1.5rem", color: "var(--gold)" }}>Football Arena</h1>
+                {["builder", "draft", "match", "leaderboard", "learn"].map((t) => (
                     <button
                         key={t}
                         onClick={() => setTab(t)}
@@ -49,7 +51,7 @@ export default function App() {
                             borderRadius: 0, color: tab === t ? "var(--text)" : "var(--text-dim)", padding: "0.5rem 0.2rem"
                         }}
                     >
-                        {t === "builder" ? "Team Builder" : t === "draft" ? "Draft Mode" : t === "match" ? "Play Match" : "Leaderboard"}
+                        {t === "builder" ? "Team Builder" : t === "draft" ? "Draft Mode" : t === "match" ? "Play Match" : t === "leaderboard" ? "Leaderboard" : "Learn"}
                     </button>
                 ))}
                 <span className="mono" style={{ marginLeft: "auto", color: "var(--text-dim)", fontSize: "0.8rem" }}>
@@ -65,6 +67,7 @@ export default function App() {
                 <DraftAssign draftedRoster={draftedRoster} onSaved={() => { setDraftedRoster(null); setTab("match"); }} />
             )}
             {tab === "leaderboard" && <Leaderboard currentUsername={user.username} />}
+            {tab === "learn" && <LearnHub />}
         </div>
     );
 }
